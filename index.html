@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Seguridad de Accesos — Plataforma Interactiva de Evaluación</title>
+<style>
+  :root { font-family: system-ui, Segoe UI, Roboto, sans-serif; background:#f1f5f9; color:#1e293b; }
+  * { box-sizing:border-box; margin:0; }
+  body { min-height:100vh; font-size:17px; }
+  .wrap { max-width:1000px; margin:0 auto; padding:16px; }
+  header { background:linear-gradient(90deg,#0f172a,#312e81); color:#fff; padding:22px 16px; }
+  header .inner { max-width:1000px; margin:0 auto; display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; }
+  header h1 { font-size:20px; }
+  header p { font-size:13px; color:#c7d2fe; }
+  nav { display:flex; flex-wrap:wrap; gap:8px; max-width:1000px; margin:12px auto 0; }
+  nav button { padding:8px 16px; border-radius:999px; font-size:13px; font-weight:600; border:1px solid transparent; cursor:pointer; background:rgba(255,255,255,.1); color:#fff; }
+  nav button.active { background:#fff; color:#0f172a; }
+  nav button:hover:not(.active) { background:rgba(255,255,255,.2); }
+  .card { background:#fff; border-radius:16px; box-shadow:0 1px 4px rgba(0,0,0,.08); padding:28px; margin-top:16px; }
+  .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); margin-top:16px; }
+  h2 { font-size:21px; margin-bottom:10px; }
+  h3 { font-size:17px; margin-bottom:8px; }
+  ul { padding-left:22px; font-size:16px; color:#334155; display:grid; gap:8px; }
+  ul li::marker { content:"✦  "; color:#6366f1; }
+  .btn { display:inline-block; background:#4f46e5; color:#fff; border:none; padding:12px 22px; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; margin-top:12px; }
+  .btn:hover { background:#4338ca; }
+  .btn.green { background:#059669; } .btn.green:hover { background:#047857; }
+  .btn.dark { background:#1e293b; } .btn.dark:hover { background:#0f172a; }
+  .btn.red { background:#dc2626; } .btn.red:hover { background:#b91c1c; }
+  .btn.gray { background:#e2e8f0; color:#1e293b; }
+  .btn.small { font-size:14px; padding:10px 14px; margin-top:10px; width:100%; }
+  .btn:disabled { background:#cbd5e1; cursor:not-allowed; }
+  input[type=text], input[type=password] { width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:16px; }
+  .pill { font-family:monospace; font-size:15px; padding:8px 14px; border-radius:999px; border:1px solid #cbd5e1; background:#f8fafc; }
+  .pill.critico { background:#fee2e2; color:#dc2626; border-color:#fca5a5; }
+  .bar { height:8px; background:#e2e8f0; border-radius:999px; overflow:hidden; margin:10px 0; }
+  .bar > div { height:100%; background:#4f46e5; border-radius:999px; transition:width .3s; }
+  .q { border-top:1px solid #e2e8f0; padding-top:16px; margin-top:16px; }
+  .q p.question { font-size:16px; font-weight:600; margin-bottom:10px; }
+  .opts { display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+  .opts button { text-align:left; font-size:15px; padding:10px 14px; border:1px solid #cbd5e1; background:#f8fafc; border-radius:10px; cursor:pointer; }
+  .opts button.sel { background:#4f46e5; color:#fff; border-color:#4f46e5; }
+  .exp { font-size:14px; color:#64748b; margin-top:6px; }
+  .nota-ok { color:#059669; font-weight:700; } .nota-mid { color:#d97706; font-weight:700; } .nota-bad { color:#dc2626; font-weight:700; }
+  .relato { font-size:16px; font-style:italic; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:14px; }
+  table { width:100%; border-collapse:collapse; font-size:16px; margin-top:14px; }
+  th { text-align:left; font-size:12px; text-transform:uppercase; color:#64748b; border-bottom:1px solid #e2e8f0; padding:8px 4px; }
+  td { border-bottom:1px solid #f1f5f9; padding:10px 4px; }
+  .estado-ok { background:#d1fae5; color:#065f46; font-size:12px; padding:3px 10px; border-radius:999px; }
+  .flex { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }
+  .mini { font-size:14px; color:#64748b; }
+  .aviso { font-size:15px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; border-radius:10px; padding:12px; margin-top:10px; }
+  footer { text-align:center; font-size:13px; color:#94a3b8; padding:24px 0; }
+  .tabs { display:flex; flex-wrap:wrap; gap:8px; }
+  .tabs button { font-size:14px; font-weight:600; padding:8px 14px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; }
+  .tabs button.active { background:#4f46e5; color:#fff; border-color:#4f46e5; }
+  @media print { header, footer, .noprint { display:none !important; } body { background:#fff; } .card { box-shadow:none; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <div>
+      <h1>🔒 Seguridad de Accesos a Escritorio y Laptops</h1>
+      <p>Acceso físico y lógico · Interfaces · Evaluación interactiva con persistencia local</p>
+    </div>
+    <div id="hdr-user" class="mini" style="color:#c7d2fe"></div>
+  </div>
+  <nav id="nav"></nav>
+</header>
+<div class="wrap" id="app"></div>
+<footer class="noprint">Plataforma didáctica · Seguridad física y lógica de endpoints · Datos guardados localmente en tu navegador</footer>
+
+<script>
+// ==================== CONTENIDO ====================
+const TEORIA = [
+ { id:"fisico", icono:"🖥️", titulo:"1. Acceso Físico", puntos:[
+  "El acceso físico es la capacidad de interactuar directamente con el hardware: es la primera línea de defensa. Sin control físico no hay control lógico pleno.",
+  "Amenazas: robo de equipo, shoulder surfing, extracción de discos, badUSB y keyloggers, arranque desde live USB, ataques DMA por Thunderbolt.",
+  "Controles: candados Kensington, control de área (credenciales, cámaras), biometría (huella, cámara IR), tarjetas inteligentes, switch de intrusión de chasis.",
+  "Firmware y hardware: TPM 2.0 (requisito de Windows 11), Secure Boot, contraseña de BIOS/UEFI, cifrado total de disco (BitLocker, FileVault, LUKS), SED/Opal.",
+  "Sanitización y disposición final según NIST SP 800-88 Rev. 2 (borrado criptográfico, wipe o destrucción documentada).",
+  "Teletrabajo: cifrado obligatorio, borrado remoto (MDM/Intune/Jamf), separación de uso personal/laboral (NIST SP 800-46; ISO 27002 7.9)."]},
+ { id:"logico", icono:"🔐", titulo:"2. Acceso Lógico", puntos:[
+  "Modelo AAA: Autenticación (verificar identidad), Autorización (qué puede hacer), Contabilidad (registrar qué hizo).",
+  "Autenticación: contraseñas según NIST SP 800-63B (14+ caracteres, no cambio forzado sin evidencia de compromiso), MFA, passkeys FIDO2/WebAuthn resistentes al phishing.",
+  "Autorización: modelos DAC, MAC, RBAC, ABAC; principio de mínimos privilegios; Zero Trust (NIST SP 800-207): nunca confiar, verificar siempre.",
+  "Cifrado: en reposo (BitLocker, FileVault, LUKS), de carpetas (EFS), gestión de claves con TPM.",
+  "Hardening: CIS Benchmarks automatizados por GPO/Intune, deshabilitar puertos y servicios no usados, parcheo continuo, EDR y firewall de host.",
+  "Monitorización: auditoría de inicios de sesión (Event Viewer, syslog), SIEM, detección de anomalías con IA en endpoints."]},
+ { id:"interfaces", icono:"🔌", titulo:"3. Interfaces: puentes de interacción", puntos:[
+  "Toda interfaz es un punto de acceso y, por tanto, una superficie de ataque. La seguridad consiste en controlar cada puente entre usuario y computadora.",
+  "Interfaces físicas: USB/USB-C y Thunderbolt (badUSB, exfiltración, DMA), salidas de video (shoulder surfing), lectores biométricos y TPM, teclado (keyloggers).",
+  "Interfaces lógicas: GUI (bloqueo de sesión), CLI/PowerShell (auditoría de comandos, JEA), APIs del SO (AppLocker/WDAC), pila de autenticación (Winlogon, PAM, WebAuthn).",
+  "Drivers y firmware son el puente hardware-SO: su parcheo es parte de la gestión de vulnerabilidades.",
+  "Práctica clave: mapear las interfaces de un equipo y aplicar hardening sobre cada una."]},
+ { id:"normativa", icono:"📋", titulo:"4. Buenas prácticas y normativas", puntos:[
+  "ISO/IEC 27001:2022 e 27002:2022: SGSI y controles (A.7 seguridad física; 8.x acceso lógico).",
+  "NIST SP 800-53 Rev. 5, SP 800-63, SP 800-88, SP 800-207 (Zero Trust).",
+  "CIS Controls v8 y CIS Benchmarks: hardening por plataforma.",
+  "FIDO Alliance / W3C: FIDO2, WebAuthn y passkeys.",
+  "Perú: Ley N.° 29733 de Protección de Datos Personales (D.S. 003-2013-JUS); ISO/IEC 27701.",
+  "Transversales: políticas escritas, gestión de riesgo (ISO 27005), concientización (ISO 27002 6.3), respaldo 3-2-1 (ISO 22301), gestión de incidentes (ISO 27035)."]}
+];
+
+const RETOS = [
+ { id:"reto-fisico", titulo:"Reto 1 — Acceso Físico", limite:300, preguntas:[
+  {q:"¿Qué chip criptográfico almacena claves y mide la integridad del arranque, siendo requisito de Windows 11?",ops:["CPU","TPM 2.0","GPU","NIC"],c:1,exp:"El TPM 2.0 protege claves y soporta el arranque medido; Windows 11 lo exige."},
+  {q:"Un disco cifrado con BitLocker extraído de una laptop robada…",ops:["Se lee con un live USB","Sus datos son ilegibles sin la clave","Se descifra con la contraseña del usuario de Windows","Se descifra conectándolo por USB-C"],c:1,exp:"El cifrado total de disco hace los datos ilegibles sin la clave de recuperación."},
+  {q:"¿Cuál es un ataque por interfaz física de alto riesgo por acceso directo a memoria?",ops:["Shoulder surfing","Phishing","Thunderbolt/DMA","SQL injection"],c:2,exp:"Thunderbolt permite ataques DMA; por eso se controlan puertos y DMA en BIOS/GPO."},
+  {q:"¿Qué estándar rige la sanitización de medios antes de disponer un equipo?",ops:["NIST SP 800-88 Rev. 2","ISO 9241","IEEE 802.1X","NIST SP 800-207"],c:0,exp:"NIST SP 800-88 Rev. 2 define el programa de sanitización de medios."},
+  {q:"¿Qué control físico detecta la apertura del gabinete de una torre?",ops:["Candado Kensington","Switch de intrusión de chasis","Cámara IR","EDR"],c:1,exp:"El switch de intrusión de chasis registra la apertura física del equipo."}]},
+ { id:"reto-logico", titulo:"Reto 2 — Acceso Lógico", limite:300, preguntas:[
+  {q:"El modelo AAA está compuesto por…",ops:["Antivirus, Antifraude, Auditoría","Autenticación, Autorización, Contabilidad","Acceso, Ancho de banda, Agentes","Análisis, Archivos, Alertas"],c:1,exp:"Autenticación, Autorización y Contabilidad (trazabilidad)."},
+  {q:"Según NIST SP 800-63B, la política de contraseñas más recomendada es…",ops:["Complejidad obligatoria y cambio mensual","14+ caracteres, sin cambio forzado sin evidencia de compromiso","6 caracteres con símbolos","Una única contraseña global"],c:1,exp:"NIST privilegia la longitud sobre la complejidad arbitraria."},
+  {q:"¿Qué estándar habilita autenticación sin contraseñas resistente al phishing?",ops:["FTP","FIDO2/WebAuthn","SNMP","SMTP"],c:1,exp:"FIDO2 (WebAuthn + CTAP) usa criptografía de clave pública: passkeys resistentes al phishing."},
+  {q:"El principio de mínimos privilegios implica…",ops:["Todos con cuenta administradora","Cuentas estándar; admin solo para tareas que lo requieren","Compartir credenciales","Desactivar la auditoría"],c:1,exp:"Se separan cuentas administrativas y se eleva solo cuando es necesario."},
+  {q:"¿Qué arquitectura exige verificar identidad y salud del dispositivo en cada acceso?",ops:["Red plana","Zero Trust (NIST SP 800-207)","Perímetro confiable","VPN de sitio a sitio"],c:1,exp:"Zero Trust: nunca confiar, verificar siempre."}]},
+ { id:"reto-interfaces", titulo:"Reto 3 — Interfaces", limite:300, preguntas:[
+  {q:"¿Por qué las interfaces son clave para la seguridad de accesos?",ops:["Solo afectan el rendimiento","Son puntos de acceso y superficies de ataque","No tienen relación con el acceso","Solo importan para el diseño"],c:1,exp:"Todo acceso atraviesa una interfaz; cada puente debe controlarse."},
+  {q:"Un badUSB explota una interfaz…",ops:["Lógica de API web","Física de puerto USB","De red inalámbrica","De impresión"],c:1,exp:"El badUSB se disfraza de periférico confiable en el puerto USB."},
+  {q:"¿Qué pareja forma el puente hardware ↔ sistema operativo y debe parchearse?",ops:["Drivers y firmware","Wallpaper y tema","Navegador y bookmarks","Fuente y cursor"],c:0,exp:"Drivers y firmware conectan hardware y SO; su parcheo es gestión de vulnerabilidades."},
+  {q:"En la CLI/PowerShell, ¿qué buena práctica de acceso lógico se aplica?",ops:["Deshabilitar todo registro","Auditoría de comandos y elevación controlada (JEA)","Usar siempre root/admin","Permitir scripts sin restricción"],c:1,exp:"Se registra la actividad y se limita la elevación."},
+  {q:"Windows Hello se apoya en interfaces…",ops:["Solo de red","Biométricas y TPM (cámara IR, lector de huella)","De almacenamiento óptico","De impresión"],c:1,exp:"La biometría del dispositivo y el TPM forman la base de la autenticación moderna de Windows."}]}
+];
+
+const CASOS = [
+ { id:"caso-1", titulo:"Caso 1 — Laptop ejecutiva robada en aeropuerto", limite:420,
+   relato:"Una ejecutiva pierde su laptop corporativa en un aeropuerto. El equipo NO tenía cifrado de disco y el usuario trabajaba con cuentas de administrador local. Había hojas de cálculo con datos personales de clientes peruanos.",
+   preguntas:[
+  {q:"¿Qué control habría evitado la exposición de los datos?",ops:["Candado Kensington","Cifrado total de disco (BitLocker/LUKS)","Papel tapiz corporativo","Antivirus gratuito"],c:1,exp:"Sin cifrado, el disco puede leerse directamente; BitLocker/LUKS habría neutralizado la extracción."},
+  {q:"¿Qué normativas se ven comprometidas?",ops:["Solo la ISO 27001","Ley 29733 (Perú) e ISO 27701","Ninguna","Solo CIS Controls"],c:1,exp:"La Ley N.° 29733 exige medidas técnicas proporcionales; ISO 27701 complementa la privacidad."},
+  {q:"¿Qué práctica de cuenta habría reducido el impacto?",ops:["Cuenta estándar + elevación puntual","Una sola cuenta admin compartida","Sin contraseñas","Autologin"],c:0,exp:"Mínimos privilegios limita lo que un atacante puede hacer una vez dentro."}]},
+ { id:"caso-2", titulo:"Caso 2 — Llama USB encontrada en el estacionamiento", limite:420,
+   relato:"Un empleado encuentra una memoria USB en el estacionamiento y la conecta a su PC 'para verificar a quién pertenece'. Era un badUSB que capturó credenciales y abrió un canal de exfiltración.",
+   preguntas:[
+  {q:"¿Qué interfaz fue el vector de entrada?",ops:["Salida HDMI","Puerto USB no controlado","Puerto Ethernet","Audio"],c:1,exp:"El puerto USB sin control (NIST AC-19/MP-7) fue el puente del atacante."},
+  {q:"¿Qué control lógico lo habría bloqueado en Windows?",ops:["GPO/Intune que bloquea almacenamiento USB + WDAC/AppLocker","Modo avión","Ocultar unidades","Cambiar el wallpaper"],c:0,exp:"El control de dispositivos extraíbles y de aplicaciones bloquea la ejecución."},
+  {q:"¿Qué práctica humana complementa el control técnico?",ops:["Concientización: nunca conectar medios desconocidos y reportar (ISO 27002 6.3)","Formatear la USB primero","Compartirla","Ignorar el incidente"],c:0,exp:"La concientización y el canal de reporte (ISO 27035) son transversales."}]},
+ { id:"caso-3", titulo:"Caso 3 — Contraseñas filtradas y phishing masivo", limite:420,
+   relato:"Un filtro de correo entrega phishing. Varios usuarios introdujeron su contraseña en el sitio falso; la institución solo usaba contraseñas, sin MFA ni auditoría de inicios de sesión.",
+   preguntas:[
+  {q:"¿Qué habría hecho el ataque impráctico incluso con contraseñas robadas?",ops:["MFA con factores resistentes al phishing (passkeys FIDO2)","Contraseñas más largas","Cambiar el fondo de pantalla","Bloquear el botón derecho"],c:0,exp:"Las passkeys FIDO2/WebAuthn son resistentes al phishing por diseño."},
+  {q:"¿Qué control de contabilidad permitiría detectar los inicios sospechosos?",ops:["Auditoría de inicios de sesión y SIEM","Desactivar los logs","Reiniciar los equipos","No hacer nada"],c:0,exp:"La auditoría (ISO 27002 8.15; NIST AU-2/AU-6) sostiene la detección."},
+  {q:"¿Qué guía de identidad digital fundamenta estas prácticas?",ops:["NIST SP 800-63","ISO 21500","ITIL v3","COBIT 5"],c:0,exp:"NIST SP 800-63 rige la autenticación y el ciclo de vida de credenciales."}]}
+];
+
+const FINAL = { id:"eval-final", titulo:"Evaluación Final Integradora", limite:600, preguntas:[
+ {q:"¿Cuál es la relación correcta entre acceso físico y lógico?",ops:["Son independientes","Sin control físico no hay control lógico pleno","El lógico reemplaza al físico","El físico solo importa en servidores"],c:1,exp:"El acceso físico es la primera línea de defensa de todo el modelo."},
+ {q:"TPM 2.0 y Secure Boot protegen principalmente…",ops:["La red","La cadena de arranque y las claves de hardware","La impresión","El correo"],c:1,exp:"Miden la integridad del arranque y custodian claves."},
+ {q:"La sanitización de un equipo retirado se documenta según…",ops:["NIST SP 800-88 Rev. 2","ISO 14001","PCI DSS","GDPR Art. 5"],c:0,exp:"NIST SP 800-88 Rev. 2 define el programa de sanitización de medios."},
+ {q:"En AAA, 'Contabilidad' significa…",ops:["Facturar al usuario","Registrar la actividad para trazabilidad","Contar equipos","Sumar puntos"],c:1,exp:"Es la trazabilidad de qué hizo cada identidad."},
+ {q:"RBAC asigna permisos…",ops:["A usuarios individuales","Por grupos/roles","Al azar","Por antigüedad"],c:1,exp:"Se asignan por roles y se revisan al menos una vez al año."},
+ {q:"El hardening con CIS Benchmarks se automatiza en Windows mediante…",ops:["GPO/Intune","Bloc de notas","Máquina virtual","Cable HDMI"],c:0,exp:"Los CIS Build Kits generan GPO y scripts."},
+ {q:"Zero Trust postula…",ops:["Confianza total dentro de la red","Nunca confiar, verificar siempre","Solo proteger el servidor","Sin registros"],c:1,exp:"NIST SP 800-207."},
+ {q:"Un keylogger físico ataca una interfaz…",ops:["Lógica de base de datos","Física de teclado","De red","De sonido"],c:1,exp:"Intercepta la entrada física del teclado."},
+ {q:"¿Qué norma peruana protege los datos personales?",ops:["Ley 30220","Ley 29733","Ley 27444","Código Civil"],c:1,exp:"La Ley N.° 29733 y su reglamento (D.S. 003-2013-JUS)."},
+ {q:"La práctica de respaldo 3-2-1 se enmarca en…",ops:["Continuidad operativa (ISO 22301)","Diseño gráfico","Marketing","Impresión"],c:0,exp:"3 copias, 2 medios, 1 fuera del sitio."},
+ {q:"El bloqueo automático de sesión tras inactividad lo exigen…",ops:["NIST AC-11 e ISO 27002 8.1","El fabricante del mouse","Solo los antivirus","Nadie"],c:0,exp:"Ambas normas lo contemplan."},
+ {q:"Las cuentas inactivas deben…",ops:["Mantenerse activas","Deshabilitarse tras 30–90 días","Elevarse a admin","Compartirse"],c:1,exp:"ISO 27002 5.11/5.18 y NIST AC-2.3."}]};
+
+// ==================== ESTADO ====================
+const STORE_KEY = "evaluacion-accesos-seguridad-v1";
+let state = { estudiante:"", dni:"", progreso:{}, vista:"inicio", tab:"fisico", abierto:null, idx:{}, segs:0, timer:null, msgRegistro:"" };
+
+const ICONOS = { retos:"🏆", casos:"💼", final:"📝", reporte:"📊", teoria:"📘", inicio:"🏠" };
+const VISTAS_EVAL = ["retos","casos","final","reporte"];
+
+function cargar(){ try{ const raw = localStorage.getItem(STORE_KEY); if(raw){ const d = JSON.parse(raw); state.estudiante = d.estudiante||""; state.dni = d.dni||""; state.progreso = d.progreso||{}; } }catch(e){} }
+function guardar(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify({estudiante:state.estudiante, dni:state.dni, progreso:state.progreso})); }catch(e){} }
+function registrado(){ return state.estudiante.trim().length>=5 && /^[0-9]{8}$/.test(state.dni); }
+function fmt(s){ return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"); }
+function esc(t){ const d=document.createElement("div"); d.textContent=t; return d.innerHTML; }
+function notaClass(n){ return n>=14?"nota-ok":n>=10.5?"nota-mid":"nota-bad"; }
+
+const NAV = [["inicio","🏠 Inicio"],["teoria","📘 Teoría"],["retos","🏆 Retos"],["casos","💼 Casos reales"],["final","📝 Evaluación final"],["reporte","📊 Reporte y PDF"]];
+const BLOQUES = { retos:RETOS, casos:CASOS, final:[FINAL] };
+
+function ir(v){
+  if(VISTAS_EVAL.indexOf(v)>=0 && !registrado()){ state.vista="inicio"; state.msgRegistro="⚠️ Para iniciar la evaluación debes registrarte con tus nombres y apellidos, y tu DNI (8 dígitos)."; render(); window.scrollTo(0,0); return; }
+  state.vista=v; state.abierto=null; state.msgRegistro="";
+  if(state.timer){clearInterval(state.timer); state.timer=null;}
+  render(); window.scrollTo(0,0);
+}
+
+// ==================== RENDER ====================
+function render(){
+  document.getElementById("hdr-user").textContent = registrado() ? "👤 "+state.estudiante+" · DNI "+state.dni : "Regístrate en Inicio para evaluar";
+  document.getElementById("nav").innerHTML = NAV.map(([v,l])=>'<button class="'+(state.vista===v?"active":"")+'" onclick="ir(\''+v+'\')">'+l+'</button>').join("");
+  const app = document.getElementById("app");
+  if(state.vista==="inicio") app.innerHTML = vistaInicio();
+  else if(state.vista==="teoria") app.innerHTML = vistaTeoria();
+  else if(state.vista==="reporte") app.innerHTML = vistaReporte();
+  else app.innerHTML = vistaCuestionario(state.vista);
+}
+
+function vistaInicio(){ return ''+
+'  <div class="card">'+
+'    <h2>👋 Bienvenido a la plataforma de evaluación</h2>'+
+'    <p class="mini" style="margin:8px 0">Consolida el tema <b>“Acceso físico y lógico a computadoras de escritorio y laptops”</b> en retos cronometrados, casos reales y una evaluación final. Tus respuestas, tiempos y notas se guardan automáticamente en este navegador y puedes exportar el consolidado en PDF.</p>'+
+'    <ul>'+
+'      <li>📘 <b>Teoría:</b> las dos dimensiones, interfaces y normativas.</li>'+
+'      <li>🏆 <b>Retos:</b> 3 retos cronometrados (físico, lógico, interfaces).</li>'+
+'      <li>💼 <b>Casos:</b> 3 casos reales con justificación normativa.</li>'+
+'      <li>📝 <b>Evaluación final:</b> 12 preguntas integradoras cronometradas.</li>'+
+'      <li>📊 <b>Reporte:</b> notas vigesimales con tiempos, exportable a PDF.</li>'+
+'    </ul>'+
+'    <div style="margin-top:18px; border-top:1px solid #e2e8f0; padding-top:16px">'+
+'      <h3>🪪 Registro del estudiante (obligatorio para evaluar)</h3>'+
+'      <div style="display:grid; gap:12px; margin-top:10px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">'+
+'        <div><label class="mini" style="font-weight:600;display:block;margin-bottom:4px">👤 Nombres y apellidos (usuario)</label>'+
+'        <input type="text" id="inp-nom" value="'+esc(state.estudiante)+'" placeholder="Ej.: Juan Carlos Ccanto Camacho" oninput="setEst(this.value)"></div>'+
+'        <div><label class="mini" style="font-weight:600;display:block;margin-bottom:4px">🔑 DNI (contraseña, 8 dígitos)</label>'+
+'        <input type="password" id="inp-dni" value="'+esc(state.dni)+'" maxlength="8" placeholder="12345678" oninput="setDni(this.value)"></div>'+
+'      </div>'+
+(state.msgRegistro?('<div class="aviso">'+state.msgRegistro+'</div>'):((!registrado() && (state.estudiante||state.dni))?('<div class="aviso">⚠️ Completa ambos campos: nombre completo y DNI de 8 dígitos numéricos.</div>'):((registrado())?('<p class="mini" style="color:#059669;margin-top:10px">✅ Registro completado. ¡Ya puedes iniciar retos, casos y evaluación final!</p>'):(""))))+
+'    </div>'+
+'    <button class="btn" onclick="ir(\'teoria\')">📘 Comenzar por la teoría</button>'+
+(registrado()?(' <button class="btn green" onclick="ir(\'retos\')">🏆 Ir a los retos →</button>'):"")+
+'  </div>';
+}
+
+function setEst(v){ state.estudiante=v; guardar(); }
+function setDni(v){ state.dni=v.replace(/[^0-9]/g,"").slice(0,8); const el=document.getElementById("inp-dni"); if(el) el.value=state.dni; guardar(); }
+
+function vistaTeoria(){
+  const t = TEORIA.find(x=>x.id===state.tab) || TEORIA[0];
+  return '<div class="tabs noprint" style="margin-top:16px">'+TEORIA.map(x=>'<button class="'+(x.id===t.id?"active":"")+'" onclick="state.tab=\''+x.id+'\';render()">'+x.icono+' '+x.titulo+'</button>').join("")+'</div>'+
+'  <div class="card"><h2>'+t.icono+' '+t.titulo+'</h2><ul>'+t.puntos.map(p=>'<li>'+p+'</li>').join("")+'</ul>'+
+'  <button class="btn" onclick="ir(\'retos\')">Ir a los Retos →</button></div>';
+}
+
+// ---------- Cuestionarios ----------
+function respuestasDe(b){ const p=state.progreso[b.id]; return (p&&p.respuestas)?p.respuestas:b.preguntas.map(function(){return null;}); }
+
+function vistaCuestionario(vista){
+  const bloques = BLOQUES[vista];
+  const idx = state.idx[vista] || 0;
+  const bloque = bloques[idx];
+  const pr = state.progreso[bloque.id];
+  const respuestas = respuestasDe(bloque);
+  const activo = state.abierto===bloque.id && !(pr&&pr.terminado);
+  const conRelato = vista==="casos";
+
+  let html = '<div class="grid">' + bloques.map(function(b,i){
+    const p=state.progreso[b.id]; const r=respuestasDe(b);
+    const ac=r.filter((x,j)=>x!==null&&x===b.preguntas[j].c).length;
+    const nota=Math.round(ac/b.preguntas.length*20);
+    return '<div class="card" style="border-left:4px solid '+(p&&p.terminado?"#10b981":"#818cf8")+'">'+
+'      <div class="flex"><h3>'+ICONOS[vista]+' '+b.titulo+'</h3>'+(p&&p.terminado?'<span class="estado-ok">✓</span>':"")+'</div>'+
+(p&&p.terminado?('<p class="mini">Nota: <span class="'+notaClass(nota)+'">'+nota+'/20</span> · ⏱ '+fmt(p.tiempo)+'</p>'):('<p class="mini">'+b.preguntas.length+' preguntas · límite '+fmt(b.limite)+'</p>'))+
+'      <button class="btn small" onclick="abrirBloque(\''+vista+'\','+i+')">'+((p&&p.terminado)?"🔎 Ver resultados":"🚀 Iniciar / Continuar")+'</button></div>';}).join("") + '</div>';
+
+  if(activo){
+    const tiempoTotal = ((pr&&pr.tiempo)||0) + state.segs;
+    const restante = Math.max(0, bloque.limite - tiempoTotal);
+    const contestadas = respuestas.filter(r=>r!==null).length;
+    html += '<div class="card">'+
+'      <div class="flex"><h3>'+ICONOS[vista]+' '+bloque.titulo+'</h3><span id="cron-pill" class="pill '+(restante<=30?"critico":"")+'">⏱ '+fmt(restante)+' restante</span></div>'+
+(conRelato&&bloque.relato?('<p class="relato" style="margin-top:12px">📌 '+bloque.relato+'</p>'):"")+
+'      <div class="bar"><div style="width:'+(contestadas/bloque.preguntas.length*100)+'%"></div></div>'+
+bloque.preguntas.map(function(p,qi){return '<div class="q"><p class="question">'+(qi+1)+'. '+p.q+'</p>'+
+'        <div class="opts">'+p.ops.map(function(op,oi){return '<button class="'+(respuestas[qi]===oi?"sel":"")+'" onclick="responder(\''+vista+'\','+qi+','+oi+')">'+op+'</button>';}).join("")+'</div></div>';}).join("")+
+'      <div class="flex"><button class="btn green" '+(contestadas===0?"disabled":"")+' onclick="finalizarBloque(\''+vista+'\')">✅ Finalizar y calificar</button>'+
+'      <span class="mini">'+contestadas+'/'+bloque.preguntas.length+' respondidas</span></div></div>';
+  } else if(pr&&pr.terminado){
+    const aciertos = respuestas.filter((r,i)=>r!==null&&r===bloque.preguntas[i].c).length;
+    const nota = Math.round(aciertos/bloque.preguntas.length*20);
+    html += '<div class="card">'+
+'      <div class="flex"><h3>'+ICONOS[vista]+' '+bloque.titulo+' — Resultado</h3><span>Nota: <span class="'+notaClass(nota)+'">'+nota+'/20</span> · ⏱ '+fmt(pr.tiempo||0)+'</span></div>'+
+bloque.preguntas.map(function(p,qi){const r=respuestas[qi]; const ok=r===p.c;
+        return '<div class="q"><p class="question">'+(ok?"✅":"❌")+' '+p.q+'</p>'+
+'        <p class="mini">Tu respuesta: <b>'+(r!==null?p.ops[r]:"—")+'</b></p>'+
+'        <p class="mini">Correcta: <b style="color:#059669">'+p.ops[p.c]+'</b></p>'+
+'        <p class="exp">💡 '+p.exp+'</p></div>';}).join("")+
+'      <div class="flex noprint">'+
+(bloques.some(b=>!(state.progreso[b.id]&&state.progreso[b.id].terminado))?('<button class="btn" onclick="siguientePendiente(\''+vista+'\')">➡️ Siguiente pendiente</button>'):"")+
+'        <button class="btn dark" onclick="ir(\'reporte\')">📊 Ver reporte</button></div></div>';
+  }
+  return html;
+}
+
+function abrirBloque(vista,i){
+  const bloques=BLOQUES[vista]; const b=bloques[i];
+  const p=state.progreso[b.id];
+  if(state.timer){clearInterval(state.timer); state.timer=null;}
+  state.idx[vista]=i;
+  if(!(p&&p.terminado)){
+    state.abierto=b.id; state.segs=0;
+    render();
+    state.timer=setInterval(function(){ state.segs++;
+      const b2=BLOQUES[vista][state.idx[vista]||0];
+      const pr2=state.progreso[b2.id]; const tt=((pr2&&pr2.tiempo)||0)+state.segs;
+      const restante=Math.max(0, b2.limite-tt);
+      const pill=document.getElementById("cron-pill");
+      if(pill){ pill.textContent="⏱ "+fmt(restante)+" restante"; pill.className="pill"+(restante<=30?" critico":""); }
+      if(tt>=b2.limite){ finalizarBloque(vista); return; }
+    },1000);
+  } else { state.abierto=null; render(); }
+}
+
+function responder(vista,qi,oi){
+  const b=BLOQUES[vista][state.idx[vista]||0];
+  const p=state.progreso[b.id]||{respuestas:b.preguntas.map(function(){return null;}),tiempo:0,terminado:false};
+  const resp=(p.respuestas||[]).slice();
+  resp[qi]=oi;
+  state.progreso[b.id]=Object.assign({},p,{respuestas:resp});
+  guardar(); render();
+}
+
+function finalizarBloque(vista){
+  const b=BLOQUES[vista][state.idx[vista]||0];
+  const p=state.progreso[b.id]||{respuestas:b.preguntas.map(function(){return null;}),tiempo:0,terminado:false};
+  state.progreso[b.id]=Object.assign({},p,{tiempo:(p.tiempo||0)+state.segs,terminado:true});
+  if(state.timer){clearInterval(state.timer); state.timer=null;}
+  state.abierto=null; guardar(); render();
+}
+
+function siguientePendiente(vista){
+  const bloques=BLOQUES[vista];
+  const i=bloques.findIndex(function(b){return !(state.progreso[b.id]&&state.progreso[b.id].terminado);});
+  abrirBloque(vista,i>=0?i:0);
+}
+
+// ---------- Reporte ----------
+function vistaReporte(){
+  const todos=[].concat(RETOS,CASOS,[FINAL]);
+  const filas=todos.map(function(b){
+    const p=state.progreso[b.id];
+    const r=(p&&p.respuestas)?p.respuestas:[];
+    const ac=r.filter((x,j)=>x!==null&&x===b.preguntas[j].c).length;
+    const nota=Math.round(ac/b.preguntas.length*20);
+    return {titulo:b.titulo,estado:(p&&p.terminado)?"Completado":"Pendiente",ac:ac,total:b.preguntas.length,nota:nota,tiempo:(p&&p.tiempo)||0};
+  });
+  const comps=filas.filter(f=>f.estado==="Completado");
+  const prom=comps.length?(comps.reduce(function(s,f){return s+f.nota;},0)/comps.length).toFixed(1):"—";
+  const fecha=new Date().toLocaleDateString("es-PE",{year:"numeric",month:"long",day:"numeric"});
+  return ''+
+'  <div class="card">'+
+'    <div class="flex" style="border-bottom:1px solid #e2e8f0;padding-bottom:12px">'+
+'      <div><h2>📊 Consolidado de Notas</h2><p class="mini">Seguridad de accesos a escritorio y laptops — retos, casos y evaluación final</p></div>'+
+'      <div class="mini" style="text-align:right"><p><b>Estudiante:</b> '+(esc(state.estudiante)||"—")+'</p><p><b>DNI:</b> '+(state.dni||"—")+'</p><p><b>Fecha:</b> '+fecha+'</p><p><b>Promedio:</b> '+prom+'/20</p></div>'+
+'    </div>'+
+'    <table><thead><tr><th>Componente</th><th>Estado</th><th>Aciertos</th><th>Tiempo</th><th>Nota (vigesimal)</th></tr></thead>'+
+'    <tbody>'+filas.map(function(f){return '<tr><td style="font-weight:600">'+f.titulo+'</td><td>'+(f.estado==="Completado"?"✅ Completado":"⏳ Pendiente")+'</td>'+
+'      <td>'+(f.estado==="Completado"?(f.ac+"/"+f.total):"—")+'</td><td>'+(f.estado==="Completado"?fmt(f.tiempo):"—")+'</td>'+
+'      <td style="font-weight:700">'+(f.estado==="Completado"?f.nota:"—")+'</td></tr>';}).join("")+'</tbody></table>'+
+'    <p class="mini" style="margin-top:14px">Tiempos cronometrados por componente · Persistencia local (navegador) · Estándares: ISO/IEC 27001-27002, NIST SP 800-53/63/88/207, CIS Controls v8, FIDO2, Ley 29733 (Perú).</p>'+
+'  </div>'+
+'  <div class="flex noprint" style="margin-top:8px">'+
+'    <button class="btn red" onclick="window.print()">📄 Exportar PDF (imprimir → guardar como PDF)</button>'+
+'    <button class="btn gray" onclick="borrarTodo()">Borrar progreso guardado</button>'+
+'  </div>';
+}
+
+function borrarTodo(){ if(confirm("¿Borrar todo el progreso guardado?")){ localStorage.removeItem(STORE_KEY); state.estudiante=""; state.dni=""; state.progreso={}; render(); } }
+
+// ==================== INICIO ====================
+cargar();
+render();
+</script>
+</body>
+</html>
